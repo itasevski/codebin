@@ -1,0 +1,29 @@
+* There is a separate SecurityContextHolder object for every single thread, i.e every single user that authenticates in our system. This object contains the
+SecurityContext, which contains the Authentication object set during authentication, which holds the principal (User object), credentials and authorities of
+the user.
+* When we set the session creation policy to STATELESS, we ensure that after EVERY request of the specific user, his SecurityContext gets cleared, meaning
+it is not persisted inbetween requests and session state is not maintained for the user, as the name suggests. However, we still must update and use the 
+SecurityContext of the user during the request's lifetime, since it gets used by other Spring Security filters for checking the user's authentication. For
+example, we update the user's context in our AuthFilter and when the filter's execution is over, the other Spring Security filters get executed and receive
+the request and response objects as parameters and then they check whether there is an Authentication object in the user's SecurityContext (UsernamePassword
+AuthenticationToken), i.e whether the user has been authenticated/authorized and if the checks pass, a 200 OK response is returned and SecurityContext is 
+cleared, otherwise a 403 Forbidden is returned and SecurityContext is cleared. After all the filters finish executing, the request finally reaches our REST 
+API endpoint, service logic is executed and response is returned to user, after which his SecurityContext (session state) gets cleared. To summarize, when
+session policy is STATELESS, session state (SecurityContext) is ephemeral (lasts shortly, only during the request's lifetime).
+* When we set the session creation policy to ALWAYS, which is stateful, all of the principles mentioned above are still valid, but now session state is 
+maintained and persisted throughout requests and the SecurityContexts for every user are kept in the server and every user has his own session. The Security
+Context is NOT cleared after every request and it is NOT ephemeral. If this is set when configuring JWT authentication, the whole point of that type of 
+STATELESS authentication becomes obsolete.
+
+-- CORS configuration
+* Cross-Origin Resource Sharing (CORS) is basically a mechanism that allows specified origins to access our server resources through specified, allowed request methods
+that contain specified, allowed request headers and/or cookies.
+* As of the current Spring Security version, the security configuration implementation has changed. Now, as it seems, if we completely disable CORS through the
+HTTP configuration, the @CrossOrigin annotation seems useless. This was tested when CORS was disabled and @CrossOrigin was set on the REST controllers and
+"Access-Control-Allow-Origin" errors were encountered on the client side. The @CrossOrigin annotation would set whitelisted origins on the controller-level, but now
+it doesn't seem to work. However, a far more sophisticated approach that should always be enforced was implemented, where instead of completely disabling CORS and
+defining whitelisted CORS origins on the controller level, we add our own custom CORS configuration, where we specify allowed origins, headers, credentials, methods
+and more. Through this, we have full control over the domains that access our REST API, the methods and headers that are used and much more, without the need to write
+repeatable code on every single controller.
+* Another important note to mention is that the "Access-Control-Allow-Origin" header that causes errors on the client side when making requests shouldn't be set
+on the client side, since the server, i.e the CORS configuration should decide which origins are allowed to access the given resource.

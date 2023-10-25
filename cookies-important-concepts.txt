@@ -1,0 +1,64 @@
+* Cookies are pieces of data that are stored in the user's browser, using the "Set-Cookie" header set in the response that we return to the user. This header
+implicitly tells the user's browser to store the cookie and send it with every request. The cookie is domain-specific, so the browser will only send the cookie
+to the domain/server that has issued the cookie. If the user's browser has multiple cookies stored in it, only the relevant ones, the ones that have been issued
+by the domain that the request is going to be made to, are going to be sent. When the user's browser receives a response, it reads the headers of the response and
+sees the "Set-Cookie" header, grabs the value of the cookie and stores it internally. Upon every request to the issuing server, the browser will automatically append
+the "Cookie" header to the request headers, and based on the server's CORS policy for allowing cookies, the server will either read the cookie from that header or
+discard the request. There are multiple configurable properties of a cookie, those being the name/value of the cookie, maxAge, httpOnly, secure, sameSite, path and
+domain.
+* Name/Value of cookie - key/value pair of the identifier of the cookie and its value.
+* maxAge - expiration time of the cookie, usually set in seconds.
+* httpOnly - a tag set to a cookie that prevents client-side scripts from accessing the cookie. This is done to avoid cross-site scripting attacks (XSS), by
+letting the browser know that if there is an attempt of accessing the cookie, an empty string should be returned. Once a JS script tries to read the cookie,
+the browser returns an empty string. Lets say there is an XSS attack and a hacker attempts to execute a malicious script on a user's browser, steal his cookies
+and send them to his own server. By using this flag, the attacker would have no way of reading the cookie with his script and thus no way of stealing information
+from the user.
+* secure - a tag set to a cookie that prevents it from being transmitted in an unencrypted, unsafe connection (HTTP). It requires an encrypted HTTPS connection
+in order for the cookie to be transmitted.
+* sameSite - a tag set to a cookie that defines whether it can be transmitted to cross-site origins (different domains from issuer). There are three possible
+values for this cookie: "Lax" (default), "Strict" and "None":
+	** Strict - doesn't allow cookie to be transmitted to different cross-site origins in all contexts. The user's browser will only send the cookies if the request is
+	made from the same domain. For example, if ivo.codebin:8080 issues the cookie, only requests coming from ivo.codebin:3000 will include the cookies. So, only strict
+	server and client domains are allowed.
+	** None - doesn't offer any protection and allows the cookie to be sent everywhere, in any cross-site origin context. However, if we set this, we must
+	require an encrypted HTTPS connection by setting the "secure" property of the cookie to "true".
+	** "Lax" (default) - a relaxed combination between security and usability. The cookie is allowed to be transmitted between the same domains and different domains
+	from third parties (through top-level-navigation, like anchor tags that make requests to our server, or scripts that execute automatically upon visiting a website that
+	make requests to our server). Also, it can only be sent as part of "GET" requests, since "POST" request are considered insecure in a CSRF (Cross-Site Request Forgery)
+	context. This is vulnerable to CSRF attacks. For example, if an attacker creates a malicious website and sets an anchor element that redirects to our server, if we have
+	this policy set, the user's browser will send the cookies to our server, thus allowing the cookies to be sent from third-parties and returning sensitive user data back to
+	the attacker.
+	** We set this policy based on our use-case scenario. If we must have different client and server domains, the policy should be set to "Lax", but in order to protect
+	from CSRF, we should configure our CORS policy in a way that only accepts incoming requests from the frontend domain. We would achieve the most security by having
+	the same domains and setting this policy to "Strict" and also configuring CORS to only allow incoming requests from our frontend domain.
+	** Since we are working with cookies, we must ensure protection against CSRF attacks. If we were using the traditional Bearer tokens and the "Authorization" header, we
+	could have ignored CSRF attacks completely because the "Authorization" header would be empty when requests are made from other domains and not from our FE
+	domain.
+* path - indicates a relative URL path that must be a part of the requested URL. For example, if path is set to "/user", the cookie will be sent along only with requests
+whose target URLs contain "/user" in them.
+* domain - indicates a domain that must be a part of the client's domain. For example, if domain is set to "example.com", the cookie will be included in requests to
+"example.com" and all of its subdomains (subdomain1.example.com, subdomain2.example.com etc.)
+
+* As part of the CORS policy, we must allow cookies to be received by incoming requests. The server dictates whether cookies will be allowed or not, just like
+the scenarios with the headers and origins. We configure this by setting the CORS configuration's "setAllowCredentials" property to "true".
+
+* Whenever we want to set a cookie in the user's browser, we use the ResponseCookie class. This class can be configured with a number of properties, such as
+the mentioned name/value of the cookie, maxAge, httpOnly, secure, sameSite, path and domain. We create the cookie and set the "Set-Cookie" header as part of the
+response returned to the client.
+
+* When configuring Spring Security, we can completely omit the whole "Authorization: Bearer ${token}" scheme for authorization purposes. Rather, we can use this cookie
+concept for a more secure way of transmitting the token and authorizing the user.
+
+* An important note is that once the cookie is set to a user's browser, the browser will automatically send the cookie to the specific domain that issued it. However, if
+we are using Axios, by default it blocks all incoming and outgoing cookies, so we must enable the behavior of accepting incoming cookies and sending outgoing
+cookies using the "withCredentials" flag and setting it to "true", for all requests, both incoming and outgoing, since we want to be able to receive and send cookies.
+
+
+
+
+
+
+
+
+
+
