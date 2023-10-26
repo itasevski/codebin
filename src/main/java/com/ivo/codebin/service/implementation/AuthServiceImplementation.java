@@ -2,7 +2,7 @@ package com.ivo.codebin.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ivo.codebin.configuration.security.constants.AuthConstants;
-import com.ivo.codebin.model.Token;
+import com.ivo.codebin.model.JwtToken;
 import com.ivo.codebin.model.User;
 import com.ivo.codebin.model.dto.LoginDto;
 import com.ivo.codebin.model.dto.RegistrationDto;
@@ -11,10 +11,7 @@ import com.ivo.codebin.model.enumerations.TokenType;
 import com.ivo.codebin.model.exception.PasswordMismatchException;
 import com.ivo.codebin.model.exception.UserExistsException;
 import com.ivo.codebin.model.response.AuthenticationResponse;
-import com.ivo.codebin.repository.TokenRepository;
-import com.ivo.codebin.repository.UserRepository;
 import com.ivo.codebin.service.*;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -33,18 +30,16 @@ import java.util.Optional;
 @AllArgsConstructor
 public class AuthServiceImplementation implements AuthService {
 
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
     private final UserService userService;
+    private final CookieService cookieService;
+    private final JwtTokenService jwtService;
+    private final CsrfTokenService csrfService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
-    private final CookieService cookieService;
-    private final CsrfService csrfService;
 
     @Override
     public Optional<User> register(RegistrationDto registrationDto) {
-        if(this.userRepository.existsByUsername(registrationDto.getUsername()))
+        if(this.userService.exists(registrationDto.getUsername()))
             throw new UserExistsException("User with username " + registrationDto.getUsername() + " already exists!");
 
         if(!registrationDto.getPassword().equals(registrationDto.getConfirmPassword()))
@@ -52,7 +47,7 @@ public class AuthServiceImplementation implements AuthService {
 
         User user = new User(registrationDto.getUsername(), this.passwordEncoder.encode(registrationDto.getPassword()), Role.ROLE_USER);
 
-        return Optional.of(this.userRepository.save(user));
+        return Optional.of(this.userService.save(user));
     }
 
     @Override
@@ -63,15 +58,15 @@ public class AuthServiceImplementation implements AuthService {
         String accessToken = this.jwtService.generateAccessToken(user);
         String refreshToken = this.jwtService.generateRefreshToken(user);
 
-        List<Token> validUserTokens = this.tokenRepository.findValidUserTokens(user.getUsername());
+        List<JwtToken> validUserTokens = this.jwtService.findValidUserTokens(user.getUsername());
         validUserTokens.forEach(validToken -> {
             validToken.setExpired(true);
             validToken.setRevoked(true);
         });
-        this.tokenRepository.saveAll(validUserTokens);
+        this.jwtService.saveAll(validUserTokens);
 
-        this.tokenRepository.save(new Token(accessToken, TokenType.ACCESS, false, false, user));
-        this.tokenRepository.save(new Token(refreshToken, TokenType.REFRESH, false, false,user));
+        this.jwtService.save(new JwtToken(accessToken, TokenType.ACCESS, user, false, false));
+        this.jwtService.save(new JwtToken(refreshToken, TokenType.REFRESH, user, false, false));
 
         ResponseCookie accessTokenCookie =
                 this.cookieService.generateCookie(
@@ -92,10 +87,11 @@ public class AuthServiceImplementation implements AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         // read the cookie-important-concepts.txt file for a detailed explanation of cookies and their properties.
 
-        String csrfToken = this.csrfService.generateCsrfToken(accessToken);
+        String csrfToken = this.csrfService.generateToken(accessToken);
 
         return AuthenticationResponse.builder()
                 .username(user.getUsername())
+                .role(user.getRole())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .csrfToken(csrfToken)
@@ -128,19 +124,19 @@ public class AuthServiceImplementation implements AuthService {
 
         if (username != null) {
             User user = this.userService.findById(username);
-            boolean isTokenNonExpiredAndNonRevoked = this.tokenRepository
+            boolean isTokenNonExpiredAndNonRevoked = this.jwtService
                     .findByToken(refreshToken)
                     .map(t -> !t.isExpired() && !t.isRevoked())
                     .orElse(false);
             if (this.jwtService.isTokenValid(refreshToken, user) && isTokenNonExpiredAndNonRevoked) {
                 String accessToken = this.jwtService.generateAccessToken(user);
-                List<Token> validUserAccessTokens = this.tokenRepository.findValidUserTokens(user.getUsername(), TokenType.ACCESS);
+                List<JwtToken> validUserAccessTokens = this.jwtService.findValidUserTokens(user.getUsername(), TokenType.ACCESS);
                 validUserAccessTokens.forEach(validToken -> {
                     validToken.setExpired(true);
                     validToken.setRevoked(true);
                 });
-                this.tokenRepository.saveAll(validUserAccessTokens);
-                this.tokenRepository.save(new Token(accessToken, TokenType.ACCESS, false, false, user));
+                this.jwtService.saveAll(validUserAccessTokens);
+                this.jwtService.save(new JwtToken(accessToken, TokenType.ACCESS, user, false, false));
 
                 ResponseCookie accessCookie =
                         this.cookieService.generateCookie(

@@ -1,6 +1,7 @@
 package com.ivo.codebin.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ivo.codebin.model.enumerations.Role;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,6 +10,8 @@ import lombok.Data;
 public class AuthenticationResponse {
 
     private String username;
+
+    private Role role;
 
     @JsonProperty("access_token")
     private String accessToken;

@@ -1,23 +1,27 @@
 package com.ivo.codebin.service.implementation;
 
 import com.ivo.codebin.configuration.security.constants.AuthConstants;
-import com.ivo.codebin.service.JwtService;
+import com.ivo.codebin.model.JwtToken;
+import com.ivo.codebin.model.enumerations.TokenType;
+import com.ivo.codebin.repository.JwtTokenRepository;
+import com.ivo.codebin.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
-public class JwtServiceImplementation implements JwtService {
+@AllArgsConstructor
+public class JwtTokenServiceImplementation implements JwtTokenService {
+    private final JwtTokenRepository jwtTokenRepository;
 
     @Override
     public String generateAccessToken(UserDetails userDetails) {
@@ -64,6 +68,31 @@ public class JwtServiceImplementation implements JwtService {
     @Override
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    @Override
+    public Optional<JwtToken> findByToken(String token) {
+        return this.jwtTokenRepository.findByToken(token);
+    }
+
+    @Override
+    public List<JwtToken> findValidUserTokens(String username) {
+        return this.jwtTokenRepository.findValidUserTokens(username);
+    }
+
+    @Override
+    public List<JwtToken> findValidUserTokens(String username, TokenType tokenType) {
+        return this.jwtTokenRepository.findValidUserTokens(username, tokenType);
+    }
+
+    @Override
+    public void save(JwtToken token) {
+        this.jwtTokenRepository.save(token);
+    }
+
+    @Override
+    public void saveAll(List<JwtToken> tokens) {
+        this.jwtTokenRepository.saveAll(tokens);
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {

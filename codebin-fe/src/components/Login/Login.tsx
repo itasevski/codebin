@@ -125,6 +125,7 @@ const Login = () => {
           Don’t have an account yet?{" "}
           <Link
             to="/register"
+            onClick={() => dispatch(clearError(undefined))}
             className="font-medium text-primary-600 hover:underline"
           >
             Sign up

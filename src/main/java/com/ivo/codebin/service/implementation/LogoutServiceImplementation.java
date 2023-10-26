@@ -1,11 +1,10 @@
 package com.ivo.codebin.service.implementation;
 
-import com.ivo.codebin.model.Token;
+import com.ivo.codebin.model.JwtToken;
 import com.ivo.codebin.model.exception.AbsentCookieException;
-import com.ivo.codebin.repository.TokenRepository;
 import com.ivo.codebin.service.CookieService;
-import com.ivo.codebin.service.CsrfService;
-import com.ivo.codebin.service.JwtService;
+import com.ivo.codebin.service.CsrfTokenService;
+import com.ivo.codebin.service.JwtTokenService;
 import com.ivo.codebin.service.LogoutService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,10 +18,9 @@ import java.util.List;
 @AllArgsConstructor
 public class LogoutServiceImplementation implements LogoutService {
 
-    private final TokenRepository tokenRepository;
-    private final JwtService jwtService;
+    private final JwtTokenService jwtService;
     private final CookieService cookieService;
-    private final CsrfService csrfService;
+    private final CsrfTokenService csrfService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -38,15 +36,15 @@ public class LogoutServiceImplementation implements LogoutService {
 
         username = this.jwtService.extractUsername(jwt);
 
-        List<Token> tokens = this.tokenRepository.findValidUserTokens(username);
+        List<JwtToken> tokens = this.jwtService.findValidUserTokens(username);
         tokens.forEach(token -> {
             token.setExpired(true);
             token.setRevoked(true);
-            this.tokenRepository.save(token);
+            this.jwtService.save(token);
             // we invalidate both the access and refresh tokens and save them in our database, after which the logout success handler is invoked and the context is cleared
             // The AuthFilter then gets executed and the token gets checked for its validity. The check fails and the other filters get invoked and executed normally.
         });
 
-        this.csrfService.removeCsrfToken(username);
+        this.csrfService.removeToken(username);
     }
 }

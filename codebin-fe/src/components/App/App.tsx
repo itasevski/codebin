@@ -6,11 +6,10 @@ import Home from "../Home/Home";
 import Login from "../Login/Login";
 import Register from "../Register/Register";
 import PrivateRoute from "../../util/route/PrivateRoute";
-import { fetchUserData, getCsrfToken } from "../../services/codebinServices";
 import { useEffect } from "react";
-import { setStorageItem } from "../../services/storageServices";
 import { useDispatch } from "react-redux";
 import { fetchCurrentUser } from "../../store";
+import { isUserAuthenticated } from "../../services/userServices";
 
 const App = () => {
   // TODO create fetchUser hook and invoke here to determine whether user is authenticated by checking the access token
@@ -18,17 +17,11 @@ const App = () => {
   const dispatch = useDispatch<any>();
 
   useEffect(() => {
-    fetchCsrfToken();
+    if (isUserAuthenticated())
+      dispatch(fetchCurrentUser())
+        .unwrap()
+        .catch(() => console.log("user is not authenticated"));
   }, []);
-
-  const fetchCsrfToken = async () => {
-    const { data } = await getCsrfToken();
-    setStorageItem("csrf_token", data);
-
-    dispatch(fetchCurrentUser())
-      .unwrap()
-      .catch(() => console.log("user is not authenticated"));
-  };
 
   return (
     <BrowserRouter>
