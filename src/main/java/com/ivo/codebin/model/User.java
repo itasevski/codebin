@@ -16,7 +16,6 @@ import java.util.List;
 @Table(name = "codebin_user")
 @NoArgsConstructor
 public class User implements UserDetails {
-
     @Id
     private String username;
 
@@ -32,7 +31,10 @@ public class User implements UserDetails {
     }
 
     @OneToMany(mappedBy = "user")
-    private List<Token> token;
+    private List<JwtToken> jwtTokens;
+
+    @OneToMany(mappedBy = "user")
+    private List<CsrfToken> csrfTokens;
 
     private boolean isAccountNonExpired = true;
     private boolean isAccountNonLocked = true;

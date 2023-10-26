@@ -7,7 +7,6 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
-    isAuthenticated: false,
     isLoading: false,
     error: null,
   },
@@ -21,22 +20,21 @@ const authSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(userLogin.fulfilled, (state: any, action: any) => {
+      state.user = { username: action.payload.username, role: action.payload.role };
       state.isLoading = false;
 
       setStorageItem("csrf_token", action.payload.csrf_token);
+      setStorageItem("isAuthenticated", true);
     });
     builder.addCase(userLogin.rejected, (state: any, action: any) => {
       state.error = action.payload;
       state.isLoading = false;
     });
+
     builder.addCase(fetchCurrentUser.fulfilled, (state: any, action: any) => {
-      state.user = action.payload;
-      state.isAuthenticated = true;
+      state.user = { username: action.payload.username, role: action.payload.role };
 
       setStorageItem("csrf_token", action.payload.csrf_token);
-    });
-    builder.addCase(fetchCurrentUser.rejected, (state: any, action: any) => {
-      state.isAuthenticated = false;
     });
   },
 });

@@ -1,13 +1,17 @@
 package com.ivo.codebin.service;
 
+import com.ivo.codebin.model.JwtToken;
+import com.ivo.codebin.model.enumerations.TokenType;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
-public interface JwtService {
+public interface JwtTokenService {
 
     String generateAccessToken(UserDetails userDetails);
 
@@ -24,5 +28,15 @@ public interface JwtService {
     String extractUsername(String token);
 
     Date extractExpiration(String token);
+
+    Optional<JwtToken> findByToken(String token);
+
+    List<JwtToken> findValidUserTokens(String username);
+
+    List<JwtToken> findValidUserTokens(String username, TokenType tokenType);
+
+    void save(JwtToken token);
+
+    void saveAll(List<JwtToken> tokens);
 
 }

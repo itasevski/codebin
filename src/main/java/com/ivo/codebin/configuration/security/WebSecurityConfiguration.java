@@ -13,7 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -32,9 +31,9 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(this.corsConfigurationSource)) // custom CORS configuration
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // we disable Spring Security's CSRF protection, since we implement our own.
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/login", "/api/auth/register", "/api/csrf/get") // we have protected routes implemented on the FE, so this is added just in case the user attempts to directly access our REST API.
+                        auth.requestMatchers("/api/auth/login", "/api/auth/register") // we have protected routes implemented on the FE, so this is added just in case the user attempts to directly access our REST API.
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())

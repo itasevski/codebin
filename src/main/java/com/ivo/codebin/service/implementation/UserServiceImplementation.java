@@ -2,10 +2,8 @@ package com.ivo.codebin.service.implementation;
 
 import com.ivo.codebin.model.User;
 import com.ivo.codebin.model.exception.UserNotFoundException;
-import com.ivo.codebin.model.response.UserResponse;
 import com.ivo.codebin.repository.UserRepository;
-import com.ivo.codebin.service.CsrfService;
-import com.ivo.codebin.service.JwtService;
+import com.ivo.codebin.service.JwtTokenService;
 import com.ivo.codebin.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,8 +15,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImplementation implements UserService {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
-    private final CsrfService csrfService;
+    private final JwtTokenService jwtService;
 
     @Override
     public User findById(String id) {
@@ -26,16 +23,20 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserResponse getUserData(String accessToken) {
+    public boolean exists(String username) {
+        return this.userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public User save(User user) {
+        return this.userRepository.save(user);
+    }
+
+    @Override
+    public User getUserData(String accessToken) {
         String username = this.jwtService.extractUsername(accessToken);
 
-        User user = findById(username);
-
-        return UserResponse.builder()
-                .username(user.getUsername())
-                .role(user.getRole())
-                .csrfToken(this.csrfService.generateCsrfTokenForUsername(username))
-                .build();
+        return findById(username);
     }
 
     @Override

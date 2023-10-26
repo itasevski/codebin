@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import { isUserAuthenticated } from "../../services/userServices";
 
 interface PrivateRouteProps {
   redirectTo: string;
@@ -7,7 +7,7 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute = ({ redirectTo, children }: PrivateRouteProps) => {
-  // if (!cookieExists("access-token")) return <Navigate to={redirectTo} />;
+  if (!isUserAuthenticated()) return <Navigate to={redirectTo} />;
 
   return children;
 };

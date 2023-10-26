@@ -2,10 +2,9 @@ package com.ivo.codebin.configuration.security.filters;
 
 import com.ivo.codebin.configuration.security.constants.AuthConstants;
 import com.ivo.codebin.model.exception.InvalidCsrfTokenException;
-import com.ivo.codebin.repository.TokenRepository;
 import com.ivo.codebin.service.CookieService;
-import com.ivo.codebin.service.CsrfService;
-import com.ivo.codebin.service.JwtService;
+import com.ivo.codebin.service.CsrfTokenService;
+import com.ivo.codebin.service.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,10 +34,9 @@ import java.io.IOException;
 public class AuthFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
-    private final TokenRepository tokenRepository;
+    private final JwtTokenService jwtService;
+    private final CsrfTokenService csrfService;
     private final CookieService cookieService;
-    private final CsrfService csrfService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -78,9 +76,7 @@ public class AuthFilter extends OncePerRequestFilter {
         // any checks here because we use methods such as "parseClaimsJws" in our JwtService that check the validity of the token (go to method implementation).
         // If token is invalid (expired), exception is thrown and filter execution is immediately executed here, returning a 403 Forbidden response to the client.
 
-        System.out.println("CSRF HEADER: " + csrfHeader);
-
-        if(username != null && !this.csrfService.isCsrfTokenValid(username, csrfHeader))
+        if(username != null && !this.csrfService.isTokenValid(username, csrfHeader))
             throw new InvalidCsrfTokenException("CSRF token is invalid!");
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -95,7 +91,7 @@ public class AuthFilter extends OncePerRequestFilter {
             // are used before expiration), created by our system with our system's private key. That is why we must check the used token and see whether it is revoked
             // (when token is revoked, it's also set to expired). If the token has been revoked/expired, we don't add the user in the SecurityContext.
             boolean isTokenNonExpiredAndNonRevoked =
-                    this.tokenRepository.findByToken(jwt)
+                    this.jwtService.findByToken(jwt)
                             .map(t -> !t.isExpired() && !t.isRevoked())
                             .orElse(false);
             if (this.jwtService.isTokenValid(jwt, userDetails) && isTokenNonExpiredAndNonRevoked) {

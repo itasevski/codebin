@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { GoCodescan } from "react-icons/go";
+import { isUserAuthenticated } from "../../services/userServices";
 
 const Header = () => {
   return (
@@ -10,16 +11,24 @@ const Header = () => {
             <span>
               <GoCodescan />
             </span>{" "}
-            <span>Codebin</span>
+            <span>CodeBin</span>
           </div>
         </Link>
         <ul className="flex space-x-3 md:space-x-9 font-semibold text-2xl text-white my-auto">
-          <Link to="/login" className="hover:text-blue-100">
-            Login
-          </Link>
-          <Link to="/register" className="hover:text-blue-100">
-            Register
-          </Link>
+          {isUserAuthenticated() ? (
+            <Link to="#" className="hover:text-blue-100">
+              Logout
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="hover:text-blue-100">
+                Login
+              </Link>
+              <Link to="/register" className="hover:text-blue-100">
+                Register
+              </Link>
+            </>
+          )}
         </ul>
       </div>
     </nav>
