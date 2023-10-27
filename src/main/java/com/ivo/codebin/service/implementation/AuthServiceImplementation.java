@@ -148,10 +148,14 @@ public class AuthServiceImplementation implements AuthService {
 
                 response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
+                String csrfToken = this.csrfService.generateToken(accessToken);
+                // generate a new CSRF token for user for future session (after access token update).
+
                 AuthenticationResponse authResponse = AuthenticationResponse.builder()
                         .username(user.getUsername())
                         .accessToken(accessToken)
                         .refreshToken("")
+                        .csrfToken(csrfToken)
                         .build();
 
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);

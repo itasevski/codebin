@@ -11,3 +11,4 @@ const store = configureStore({
 export { store, clearError };
 export * from "./thunks/userLogin";
 export * from "./thunks/fetchCurrentUser";
+export * from "./thunks/userLogout";

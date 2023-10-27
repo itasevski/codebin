@@ -1,8 +1,14 @@
 import { useSelector } from "react-redux";
 import { test } from "../../services/codebinServices";
+import Spinner from "../Spinner/Spinner";
+import { useEffect } from "react";
 
 const Dashboard = () => {
-  test().then(({ data }) => console.log(data));
+  useEffect(() => {
+    test()
+      .then(({ data }) => console.log(data))
+      .catch((err) => console.log(err));
+  }, []);
 
   const { user } = useSelector((state: any) => state.auth);
 
@@ -11,7 +17,7 @@ const Dashboard = () => {
       {user ? (
         <div className="text-5xl font-semibold">Welcome, {user.username}.</div>
       ) : (
-        <div className="w-6 h-6 border-t-4 border-blue-500 border-solid rounded-full animate-spin my-auto" />
+        <Spinner />
       )}
     </div>
   );

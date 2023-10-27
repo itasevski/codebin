@@ -24,7 +24,7 @@ public class LogoutServiceImplementation implements LogoutService {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        final String jwt;
+        final String accessToken;
         final String username;
 
         if (request.getCookies() == null || !this.cookieService.authCookieExists(request))
@@ -32,9 +32,9 @@ public class LogoutServiceImplementation implements LogoutService {
         // when adding our custom logout service to Spring Security, our AuthFilter (the OncePerRequestFilter) isn't executed at all,
         // so we must check the presence of the cookies here.
 
-        jwt = this.cookieService.extractCookie(request, "access-token");
+        accessToken = this.cookieService.extractCookie(request, "access-token");
 
-        username = this.jwtService.extractUsername(jwt);
+        username = this.jwtService.extractUsername(accessToken);
 
         List<JwtToken> tokens = this.jwtService.findValidUserTokens(username);
         tokens.forEach(token -> {

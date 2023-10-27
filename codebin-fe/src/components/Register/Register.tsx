@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PASSWORD_REGEX, USERNAME_REGEX } from "../../util/regexps";
 import { GoInfo, GoX } from "react-icons/go";
 import { register } from "../../services/codebinServices";
+import Spinner from "../Spinner/Spinner";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -177,11 +178,7 @@ const Register = () => {
           )}
         </div>
         <button type="submit" className="btn btn-primary flex">
-          {loading ? (
-            <div className="w-6 h-6 border-t-4 border-blue-500 border-solid rounded-full animate-spin my-auto" />
-          ) : (
-            "Register"
-          )}
+          {loading ? <Spinner /> : "Register"}
         </button>
         <p className="text-sm font-light text-gray-500">
           Already have an account?{" "}

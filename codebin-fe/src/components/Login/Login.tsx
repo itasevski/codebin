@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthContainer from "../../containers/AuthFormContainer";
 import { clearError, userLogin } from "../../store/";
 import { useDispatch, useSelector } from "react-redux";
+import Spinner from "../Spinner/Spinner";
 
 const Login = () => {
   const location = useLocation(); // object used to access history state set by "useNavigate"
@@ -115,11 +116,7 @@ const Login = () => {
           </a>
         </div>
         <button type="submit" className="btn btn-primary">
-          {isLoading ? (
-            <div className="w-6 h-6 border-t-4 border-blue-500 border-solid rounded-full animate-spin my-auto" />
-          ) : (
-            "Login"
-          )}
+          {isLoading ? <Spinner /> : "Login"}
         </button>
         <p className="text-sm font-light text-gray-500">
           Don’t have an account yet?{" "}

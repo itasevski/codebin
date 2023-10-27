@@ -18,6 +18,13 @@ export const fetchUserData = () =>
     },
   });
 
+export const logout = () =>
+  axiosCustom.get("/auth/logout", {
+    headers: {
+      "X-XSRF-TOKEN": getDecryptedStorageItem("csrf_token"),
+    },
+  });
+
 // for testing purposes
 export const test = () =>
   axiosCustom.get("/test", {

@@ -21,7 +21,7 @@ const App = () => {
       dispatch(fetchCurrentUser())
         .unwrap()
         .catch(() => console.log("user is not authenticated"));
-  }, []);
+  }, [dispatch]);
 
   return (
     <BrowserRouter>

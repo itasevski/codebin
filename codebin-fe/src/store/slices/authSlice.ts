@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { userLogin } from "../thunks/userLogin";
 import {
+  removeStorageItem,
   setEncryptedStorageItem,
   setStorageItem,
 } from "../../services/storageServices";
 import { fetchCurrentUser } from "../thunks/fetchCurrentUser";
+import { userLogout } from "../thunks/userLogout";
 
 const authSlice = createSlice({
   name: "auth",
@@ -44,6 +46,13 @@ const authSlice = createSlice({
       };
 
       setEncryptedStorageItem("csrf_token", action.payload.csrf_token);
+    });
+
+    builder.addCase(userLogout.fulfilled, (state: any, action: any) => {
+      state.user = null;
+
+      removeStorageItem("csrf_token");
+      removeStorageItem("isAuthenticated");
     });
   },
 });
