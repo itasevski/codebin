@@ -88,6 +88,7 @@ public class AuthServiceImplementation implements AuthService {
         // read the cookie-important-concepts.txt file for a detailed explanation of cookies and their properties.
 
         String csrfToken = this.csrfService.generateToken(accessToken);
+        // generate a new CSRF token for user for future session (after login).
 
         return AuthenticationResponse.builder()
                 .username(user.getUsername())
@@ -152,6 +153,7 @@ public class AuthServiceImplementation implements AuthService {
                         .accessToken(accessToken)
                         .refreshToken("")
                         .build();
+
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }

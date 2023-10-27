@@ -1,6 +1,9 @@
 import { useSelector } from "react-redux";
+import { test } from "../../services/codebinServices";
 
 const Dashboard = () => {
+  test().then(({ data }) => console.log(data));
+
   const { user } = useSelector((state: any) => state.auth);
 
   return (

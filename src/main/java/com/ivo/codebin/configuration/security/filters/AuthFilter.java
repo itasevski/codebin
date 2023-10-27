@@ -77,7 +77,7 @@ public class AuthFilter extends OncePerRequestFilter {
         // If token is invalid (expired), exception is thrown and filter execution is immediately executed here, returning a 403 Forbidden response to the client.
 
         if(username != null && !this.csrfService.isTokenValid(username, csrfHeader))
-            throw new InvalidCsrfTokenException("CSRF token is invalid!");
+            throw new InvalidCsrfTokenException("CSRF token is invalid!"); // if token stored in map for user does not match incoming CSRF token, throw exception
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // we don't really need to check whether the context is null, since it's going to be null every time. (context gets cleared after response is returned)

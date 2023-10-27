@@ -23,6 +23,8 @@ public class UserRestController {
                 UserResponse.builder()
                 .username(user.getUsername())
                 .role(user.getRole())
+                // for every request to fetch user data, we generate a new CSRF token for the current session. On the client-side, this endpoint gets called
+                // for every authenticated user, upon initial page load and on every refresh, indicating a new session which requires a new CSRF token.
                 .csrfToken(this.csrfTokenService.generateTokenForUsername(user.getUsername()))
                 .build());
     }

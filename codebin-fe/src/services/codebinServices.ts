@@ -1,14 +1,8 @@
 import axiosCustom from "../util/axiosCustom";
-import { getStorageItem } from "./storageServices";
+import { getDecryptedStorageItem } from "./storageServices";
 
-export const fetchUserData = () =>
-  axiosCustom.get("/user", {
-    headers: {
-      "X-XSRF-TOKEN": getStorageItem("csrf_token"),
-    },
-  });
-
-export const getCsrfToken = () => axiosCustom.get("/csrf/get");
+export const login = (username: string, password: string) =>
+  axiosCustom.post("/auth/login", { username, password });
 
 export const register = (
   username: string,
@@ -17,13 +11,17 @@ export const register = (
 ) =>
   axiosCustom.post("/auth/register", { username, password, confirmPassword });
 
-export const login = (username: string, password: string) =>
-  axiosCustom.post("/auth/login", { username, password });
+export const fetchUserData = () =>
+  axiosCustom.get("/user", {
+    headers: {
+      "X-XSRF-TOKEN": getDecryptedStorageItem("csrf_token"),
+    },
+  });
 
 // for testing purposes
 export const test = () =>
   axiosCustom.get("/test", {
     headers: {
-      "X-XSRF-TOKEN": getStorageItem("csrf_token"),
+      "X-XSRF-TOKEN": getDecryptedStorageItem("csrf_token"),
     },
   });

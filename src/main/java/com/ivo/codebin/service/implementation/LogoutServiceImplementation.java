@@ -41,10 +41,10 @@ public class LogoutServiceImplementation implements LogoutService {
             token.setExpired(true);
             token.setRevoked(true);
             this.jwtService.save(token);
-            // we invalidate both the access and refresh tokens and save them in our database, after which the logout success handler is invoked and the context is cleared
-            // The AuthFilter then gets executed and the token gets checked for its validity. The check fails and the other filters get invoked and executed normally.
+            // we invalidate both the access and refresh tokens and save them in our database, after which the logout success handler is invoked and the context is cleared.
         });
 
         this.csrfService.removeToken(username);
+        // we also remove the current CSRF token for the user.
     }
 }

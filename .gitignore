@@ -57,3 +57,5 @@ codebin-fe/.env.production.local
 codebin-fe/npm-debug.log*
 codebin-fe/yarn-debug.log*
 codebin-fe/yarn-error.log*
+
+codebin-fe/.env

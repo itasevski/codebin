@@ -1,6 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { userLogin } from "../thunks/userLogin";
-import { setStorageItem } from "../../services/storageServices";
+import {
+  setEncryptedStorageItem,
+  setStorageItem,
+} from "../../services/storageServices";
 import { fetchCurrentUser } from "../thunks/fetchCurrentUser";
 
 const authSlice = createSlice({
@@ -20,10 +23,13 @@ const authSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(userLogin.fulfilled, (state: any, action: any) => {
-      state.user = { username: action.payload.username, role: action.payload.role };
+      state.user = {
+        username: action.payload.username,
+        role: action.payload.role,
+      };
       state.isLoading = false;
 
-      setStorageItem("csrf_token", action.payload.csrf_token);
+      setEncryptedStorageItem("csrf_token", action.payload.csrf_token);
       setStorageItem("isAuthenticated", true);
     });
     builder.addCase(userLogin.rejected, (state: any, action: any) => {
@@ -32,9 +38,12 @@ const authSlice = createSlice({
     });
 
     builder.addCase(fetchCurrentUser.fulfilled, (state: any, action: any) => {
-      state.user = { username: action.payload.username, role: action.payload.role };
+      state.user = {
+        username: action.payload.username,
+        role: action.payload.role,
+      };
 
-      setStorageItem("csrf_token", action.payload.csrf_token);
+      setEncryptedStorageItem("csrf_token", action.payload.csrf_token);
     });
   },
 });
