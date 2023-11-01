@@ -4,6 +4,7 @@ import com.ivo.codebin.model.exception.base.BadRequestException;
 import com.ivo.codebin.model.exception.base.ForbiddenException;
 import com.ivo.codebin.model.exception.base.ResourceNotFoundException;
 import com.ivo.codebin.model.response.ExceptionResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -35,6 +36,11 @@ public class CodebinControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ExceptionResponse> handleForbiddenException(ForbiddenException exception, WebRequest request) {
         return responseEntityException(exception.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ExceptionResponse> handleExpiredJwtException(ExpiredJwtException exception, WebRequest request) {
+        return responseEntityException(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<ExceptionResponse> responseEntityException(String message, HttpStatus httpStatus) {

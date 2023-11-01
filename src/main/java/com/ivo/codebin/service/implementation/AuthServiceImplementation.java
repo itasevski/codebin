@@ -93,8 +93,6 @@ public class AuthServiceImplementation implements AuthService {
         return AuthenticationResponse.builder()
                 .username(user.getUsername())
                 .role(user.getRole())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .csrfToken(csrfToken)
                 .build();
 
@@ -153,8 +151,7 @@ public class AuthServiceImplementation implements AuthService {
 
                 AuthenticationResponse authResponse = AuthenticationResponse.builder()
                         .username(user.getUsername())
-                        .accessToken(accessToken)
-                        .refreshToken("")
+                        .role(user.getRole())
                         .csrfToken(csrfToken)
                         .build();
 

@@ -6,23 +6,8 @@ import Home from "../Home/Home";
 import Login from "../Login/Login";
 import Register from "../Register/Register";
 import PrivateRoute from "../../util/route/PrivateRoute";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { fetchCurrentUser } from "../../store";
-import { isUserAuthenticated } from "../../services/userServices";
 
 const App = () => {
-  // TODO create fetchUser hook and invoke here to determine whether user is authenticated by checking the access token
-  // ... generate CSRF token afterwards
-  const dispatch = useDispatch<any>();
-
-  useEffect(() => {
-    if (isUserAuthenticated())
-      dispatch(fetchCurrentUser())
-        .unwrap()
-        .catch(() => console.log("user is not authenticated"));
-  }, [dispatch]);
-
   return (
     <BrowserRouter>
       <Header />

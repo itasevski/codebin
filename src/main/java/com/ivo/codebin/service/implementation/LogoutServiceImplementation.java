@@ -1,7 +1,9 @@
 package com.ivo.codebin.service.implementation;
 
 import com.ivo.codebin.model.JwtToken;
+import com.ivo.codebin.model.User;
 import com.ivo.codebin.model.exception.AbsentCookieException;
+import com.ivo.codebin.model.exception.UserNotFoundException;
 import com.ivo.codebin.service.CookieService;
 import com.ivo.codebin.service.CsrfTokenService;
 import com.ivo.codebin.service.JwtTokenService;
@@ -25,7 +27,6 @@ public class LogoutServiceImplementation implements LogoutService {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         final String accessToken;
-        final String username;
 
         if (request.getCookies() == null || !this.cookieService.authCookieExists(request))
             throw new AbsentCookieException("Required Auth Cookie is not present!");
@@ -34,9 +35,10 @@ public class LogoutServiceImplementation implements LogoutService {
 
         accessToken = this.cookieService.extractCookie(request, "access-token");
 
-        username = this.jwtService.extractUsername(accessToken);
+        User user = this.jwtService.getTokenOwner(accessToken);
+        if(user == null) throw new UserNotFoundException("User does not exist!");
 
-        List<JwtToken> tokens = this.jwtService.findValidUserTokens(username);
+        List<JwtToken> tokens = this.jwtService.findValidUserTokens(user.getUsername());
         tokens.forEach(token -> {
             token.setExpired(true);
             token.setRevoked(true);
@@ -44,7 +46,7 @@ public class LogoutServiceImplementation implements LogoutService {
             // we invalidate both the access and refresh tokens and save them in our database, after which the logout success handler is invoked and the context is cleared.
         });
 
-        this.csrfService.removeToken(username);
+        this.csrfService.removeToken(user.getUsername());
         // we also remove the current CSRF token for the user.
     }
 }

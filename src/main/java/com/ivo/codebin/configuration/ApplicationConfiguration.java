@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 // @Configuration is used for classes that have bean definitions in them, like in this case, where we create a specific configuration.
 @Configuration
@@ -48,7 +49,7 @@ public class ApplicationConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://ivo.local.codebin:3000")); // allow only incoming requests from "http://localhost:3000"
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000")); // allow only incoming requests from "http://localhost:3000"
         corsConfiguration.addAllowedHeader("*"); // allow all headers
         // corsConfiguration.setAllowedHeaders(Arrays.asList("Accept", "Access-Control-Allow-Origin", "Content-Type", "Dnt", "Referer", "Authorization", "Sec-Ch-Ua", "Sec-Ch-Ua-Mobile", "Sec-Ch-Ua-Platform", "User-Agent"));
         corsConfiguration.setAllowCredentials(true); // allow cookies to be received

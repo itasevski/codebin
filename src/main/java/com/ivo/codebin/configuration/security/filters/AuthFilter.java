@@ -55,13 +55,13 @@ public class AuthFilter extends OncePerRequestFilter {
             // filters and terminate this function.
         }
 
-        if(request.getServletPath().equals("/api/auth/refresh-token"))
+        if (request.getServletPath().equals("/api/auth/refresh-token")) {
             jwt = this.cookieService.extractCookie(request, "refresh-token");
-        else jwt = this.cookieService.extractCookie(request, "access-token");
+        } else jwt = this.cookieService.extractCookie(request, "access-token");
+
         // otherwise, extract JWT from access or refresh token cookie based on the request URL.
         // since both cookies are going to be sent on every request the user makes (if they're available, i.e if user is authenticated), we need to check the
         // request URL and determine whether we need to generate a new access token by using the refresh token or grab the existing one.
-
 
         // This is a very important point during this filter's execution. The "extractUsername" method invokes a parsing function of the JWT, meaning that if
         // the JWT is in some way invalid (does not exist, invalid signature, expired or anything else), the parsing method would throw an exception, therefore

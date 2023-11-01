@@ -2,6 +2,8 @@ package com.ivo.codebin.service.implementation;
 
 import com.ivo.codebin.configuration.security.constants.AuthConstants;
 import com.ivo.codebin.model.JwtToken;
+import com.ivo.codebin.model.User;
+import com.ivo.codebin.model.base.Token;
 import com.ivo.codebin.model.enumerations.TokenType;
 import com.ivo.codebin.repository.JwtTokenRepository;
 import com.ivo.codebin.service.JwtTokenService;
@@ -63,6 +65,12 @@ public class JwtTokenServiceImplementation implements JwtTokenService {
     @Override
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    @Override
+    public User getTokenOwner(String token) {
+        Optional<JwtToken> existingToken = findByToken(token);
+        return existingToken.map(Token::getUser).orElse(null);
     }
 
     @Override

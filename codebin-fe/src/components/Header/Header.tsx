@@ -2,16 +2,26 @@ import { Link } from "react-router-dom";
 import { GoCodescan } from "react-icons/go";
 import { isUserAuthenticated } from "../../services/userServices";
 import { useThunk } from "../../hooks/useThunk";
-import { userLogout } from "../../store";
+import { fetchCurrentUser, userLogout } from "../../store";
 import Spinner from "../Spinner/Spinner";
 import ErrorAlert from "../ErrorAlert/ErrorAlert";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 const Header = () => {
+  const dispatch = useDispatch<any>();
   const [logout, loading, error] = useThunk(userLogout, "/");
 
   const handleLogout = () => {
     logout(undefined);
   };
+
+  useEffect(() => {
+    if (isUserAuthenticated())
+      dispatch(fetchCurrentUser())
+        .unwrap()
+        .catch(() => handleLogout());
+  }, [dispatch]);
 
   return (
     <nav className="bg-blue-800 p-4">

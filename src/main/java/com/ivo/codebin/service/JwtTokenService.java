@@ -1,6 +1,7 @@
 package com.ivo.codebin.service;
 
 import com.ivo.codebin.model.JwtToken;
+import com.ivo.codebin.model.User;
 import com.ivo.codebin.model.enumerations.TokenType;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,8 @@ public interface JwtTokenService {
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
     String extractUsername(String token);
+
+    User getTokenOwner(String token);
 
     Date extractExpiration(String token);
 

@@ -13,13 +13,10 @@ public class AuthenticationResponse {
 
     private Role role;
 
-    @JsonProperty("access_token")
-    private String accessToken;
-
-    @JsonProperty("refresh_token")
-    private String refreshToken;
-
     @JsonProperty("csrf_token")
     private String csrfToken;
+
+    // we don't need to include the access or refresh tokens here, since they are set as cookies in the user's browser and won't be accessed or manipulated
+    // through JavaScript.
 
 }
