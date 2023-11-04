@@ -38,11 +38,6 @@ public class CodebinControllerAdvice extends ResponseEntityExceptionHandler {
         return responseEntityException(exception.getMessage(), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ExceptionResponse> handleExpiredJwtException(ExpiredJwtException exception, WebRequest request) {
-        return responseEntityException(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
     private ResponseEntity<ExceptionResponse> responseEntityException(String message, HttpStatus httpStatus) {
         ExceptionResponse response = ExceptionResponse.builder().message(message).timestamp(new Date().toString()).build();
         return new ResponseEntity<>(response, httpStatus);

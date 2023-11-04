@@ -47,6 +47,7 @@ axiosCustom.interceptors.response.use(
       originalRequest._retry = true;
 
       const { data } = await refreshToken();
+      // if Promise.reject is returned from this call, this function is terminated and the Promise.reject is returned
 
       setEncryptedStorageItem("csrf_token", data.csrf_token);
       // isAuthenticated is already set to true
@@ -58,5 +59,24 @@ axiosCustom.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+// We need to check every response that is received for any errors, more specifically 403 Forbidden errors, and use the user's refresh token
+// to update his access token. If there aren't any errors, the response is just returned to the original place where the call/request was made.
+// These interceptors are technically Axios middleware between incoming and outgoing requests.
+/**
+ * 1. The user accesses protected resource, browser sends request to server
+ * 2. The server detects expired access token, sends response with status code 403 back to user
+ * 3. The Axios response interceptor catches the response, sees that there has been an error and invokes the error callback from this "use" function
+ * 4. The interceptor checks whether the error is a 403 Forbidden error, the url is not "/auth/refresh-token" (explained below), the _retry flag is not set and the user is authenticated.
+ * If the user is not authenticated, we just return a reject Promise back to where the call/request was made.
+ * 5. If the error is a 403 Forbidden error and the user is authenticated, it means the user has an expired access token
+ * 6. We set the _retry flag of the original request to the protected resource to "true", as an indicator that it is a retry attempt of accessing the protected resource
+ * 7. The "refreshToken" endpoint is called, generating a new access token for the user
+ * 8. The interceptor catches the response sent from the server. If there has been an error again, it won't enter the "if" clause since there is a check
+ * that ensures that the invoked URL is not "/auth/refresh-token". We do this to avoid an infinite loop in the case there is an error when refreshing the user's access token, i.e. when the user's refresh token is expired.
+ * 9. If it is a 200 OK response, it is returned to where the call/request was made (await refreshToken() - line 50)
+ * 10. The user's CSRF token is updated and original request is invoked again (axiosCustom(originalRequest)) with new CSRF token.
+ * 11. If there is an error for some unknown reason again, the _retry flag is checked and present, meaning that the "if" clause body won't be executed
+ * and a reject Promise will be returned.
+ */
 
 export default axiosCustom;

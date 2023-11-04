@@ -20,7 +20,7 @@ const Header = () => {
     if (isUserAuthenticated())
       dispatch(fetchCurrentUser())
         .unwrap()
-        .catch(() => handleLogout());
+        .catch(() => handleLogout()); // log user out if Axios response interceptor returns an error (Promise.reject)
   }, [dispatch]);
 
   return (
@@ -28,8 +28,8 @@ const Header = () => {
       {error && (
         <ErrorAlert
           status={error.status}
-          message={error.message}
-          timestamp={error.timestamp}
+          message={error.message || "Forbidden"}
+          timestamp={error.timestamp || new Date().toString()}
         />
       )}
       <div className="flex justify-between mx-0 md:mx-16">
