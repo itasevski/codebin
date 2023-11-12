@@ -1,5 +1,6 @@
 package com.ivo.codebin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ivo.codebin.model.enumerations.Role;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -30,11 +31,21 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    // the "mappedBy" property tells Hibernate that this relation is mapped by the "user" field in the JwtToken class, preventing the creation of an additional
+    // table to satisfy this type of relationship. However, if we retrieve an entity from this class by sending a request to our REST controller, recursion
+    // issues will occur, since the Jackson library doesn't care about this "mappedBy" property. That is why we use the @JsonIgnore annotation, which excludes
+    // fields from classes that are serialized into JSON values.
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<JwtToken> jwtTokens;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<CsrfToken> csrfTokens;
+
+    @OneToMany(mappedBy = "owner")
+    @JsonIgnore
+    private List<Snippet> snippets;
 
     private boolean isAccountNonExpired = true;
     private boolean isAccountNonLocked = true;
